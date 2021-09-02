@@ -5,6 +5,8 @@
  */
 package io.debezium.relational;
 
+import java.util.Optional;
+
 import io.debezium.DebeziumException;
 import io.debezium.pipeline.spi.OffsetContext;
 import io.debezium.pipeline.spi.Partition;
@@ -47,7 +49,7 @@ public abstract class HistorizedRelationalDatabaseSchema extends RelationalDatab
             String msg = "The db history topic or its content is fully or partially missing. Please check database history topic configuration and re-execute the snapshot.";
             throw new DebeziumException(msg);
         }
-        databaseHistory.recover(partition.getSourcePartition(), offset.getOffset(), tables(), getDdlParser());
+        databaseHistory.recover(partition.getSourcePartition(), offset.getOffset(), tables(), getDdlParser(), getDefaultValueConverter());
         recoveredTables = !tableIds().isEmpty();
         for (TableId tableId : tableIds()) {
             buildAndRegisterSchema(tableFor(tableId));
@@ -75,6 +77,14 @@ public abstract class HistorizedRelationalDatabaseSchema extends RelationalDatab
      * history.
      */
     protected abstract DdlParser getDdlParser();
+
+    /**
+     * Returns a new instance of the {@link DefaultValueConverter} to be used when recovering the default value
+     * from a previously persisted history.
+     */
+    public DefaultValueConverter getDefaultValueConverter() {
+        return (column, defaultValue) -> Optional.ofNullable(defaultValue);
+    }
 
     /**
      * Records the given schema change event in the persistent history.
