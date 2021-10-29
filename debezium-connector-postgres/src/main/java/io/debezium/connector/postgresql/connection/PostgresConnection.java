@@ -570,7 +570,6 @@ public class PostgresConnection extends JdbcConnection {
             final String defaultValue = columnMetadata.getString(13);
             if (defaultValue != null) {
                 column.defaultValueExpression(defaultValue);
-                getDefaultValue(column.create(), defaultValue).ifPresent(column::defaultValue);
             }
 
             return Optional.of(column);
@@ -579,9 +578,8 @@ public class PostgresConnection extends JdbcConnection {
         return Optional.empty();
     }
 
-    @Override
-    protected Optional<Object> getDefaultValue(Column column, String defaultValue) {
-        return defaultValueConverter.parseDefaultValue(column, defaultValue);
+    public PostgresDefaultValueConverter getDefaultValueConverter() {
+        return defaultValueConverter;
     }
 
     public TypeRegistry getTypeRegistry() {

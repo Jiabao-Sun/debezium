@@ -135,10 +135,8 @@ public interface DatabaseHistory {
      * @param schema the table definitions that should be changed to reflect the database schema at the desired point in history;
      *            may not be null
      * @param ddlParser the DDL parser that can be used to apply DDL statements to the given {@code schema}; may not be null
-     * @param defaultValueConverter the default value converter that can be used to to convert the string default value to a Java type
-     *            recognized by value converters for a subset of types; may not be null
      */
-    void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser, DefaultValueConverter defaultValueConverter);
+    void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser);
 
     /**
      * Stop recording history and release any resources acquired since {@link #configure(Configuration, HistoryRecordComparator, DatabaseHistoryListener)}.

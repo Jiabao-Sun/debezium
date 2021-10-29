@@ -54,6 +54,7 @@ public class TableSchemaBuilder {
 
     private final SchemaNameAdjuster schemaNameAdjuster;
     private final ValueConverterProvider valueConverterProvider;
+    private final DefaultValueConverter defaultValueConverter;
     private final Schema sourceInfoSchema;
     private final FieldNamer<Column> fieldNamer;
     private final CustomConverterRegistry customConverterRegistry;
@@ -66,11 +67,33 @@ public class TableSchemaBuilder {
      *            null
      * @param schemaNameAdjuster the adjuster for schema names; may not be null
      */
-    public TableSchemaBuilder(ValueConverterProvider valueConverterProvider, SchemaNameAdjuster schemaNameAdjuster,
-                              CustomConverterRegistry customConverterRegistry, Schema sourceInfoSchema,
+    public TableSchemaBuilder(ValueConverterProvider valueConverterProvider,
+                              SchemaNameAdjuster schemaNameAdjuster,
+                              CustomConverterRegistry customConverterRegistry,
+                              Schema sourceInfoSchema,
+                              boolean sanitizeFieldNames, boolean multiPartitionMode) {
+        this(valueConverterProvider, null, schemaNameAdjuster,
+                customConverterRegistry, sourceInfoSchema, sanitizeFieldNames, multiPartitionMode);
+    }
+
+    /**
+     * Create a new instance of the builder.
+     *
+     * @param valueConverterProvider the provider for obtaining {@link ValueConverter}s and {@link SchemaBuilder}s; may not be
+     *            null
+     * @param defaultValueConverter is used to convert the default value literal to a Java type
+     *            recognized by value converters for a subset of types. may be null.
+     * @param schemaNameAdjuster the adjuster for schema names; may not be null
+     */
+    public TableSchemaBuilder(ValueConverterProvider valueConverterProvider,
+                              DefaultValueConverter defaultValueConverter,
+                              SchemaNameAdjuster schemaNameAdjuster,
+                              CustomConverterRegistry customConverterRegistry,
+                              Schema sourceInfoSchema,
                               boolean sanitizeFieldNames, boolean multiPartitionMode) {
         this.schemaNameAdjuster = schemaNameAdjuster;
         this.valueConverterProvider = valueConverterProvider;
+        this.defaultValueConverter = defaultValueConverter;
         this.sourceInfoSchema = sourceInfoSchema;
         this.fieldNamer = FieldNameSelector.defaultSelector(sanitizeFieldNames);
         this.customConverterRegistry = customConverterRegistry;
@@ -376,8 +399,14 @@ public class TableSchemaBuilder {
 
             // if the default value is provided
             if (column.hasDefaultValue()) {
+                Object defaultValue = column.defaultValueExpression();
+                if (defaultValueConverter != null) {
+                    defaultValue = defaultValueConverter.parseDefaultValue(column, column.defaultValueExpression());
+                }
+
                 fieldBuilder
-                        .defaultValue(customConverterRegistry.getValueConverter(table.id(), column).orElse(ValueConverter.passthrough()).convert(column.defaultValue()));
+                        .defaultValue(customConverterRegistry.getValueConverter(table.id(), column)
+                                .orElse(ValueConverter.passthrough()).convert(defaultValue));
             }
 
             builder.field(fieldNamer.fieldNameFor(column), fieldBuilder.build());

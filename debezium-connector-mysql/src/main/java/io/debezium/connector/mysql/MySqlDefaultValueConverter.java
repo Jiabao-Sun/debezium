@@ -75,12 +75,12 @@ public class MySqlDefaultValueConverter implements DefaultValueConverter {
      * recognized by value converters for a subset of types.
      *
      * @param column       the column definition describing the {@code data} value; never null
-     * @param defaultValue the default value; may be null
+     * @param defaultValueExpression the default value literal; may be null
      * @return value converted to a Java type; optional
      */
     @Override
-    public Optional<Object> parseDefaultValue(Column column, String defaultValue) {
-        return Optional.ofNullable(convert(column, defaultValue));
+    public Optional<Object> parseDefaultValue(Column column, String defaultValueExpression) {
+        return Optional.ofNullable(convert(column, defaultValueExpression));
     }
 
     /**

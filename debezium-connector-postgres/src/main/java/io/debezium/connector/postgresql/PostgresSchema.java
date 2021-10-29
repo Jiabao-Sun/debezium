@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.debezium.connector.postgresql.connection.PostgresDefaultValueConverter;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.slf4j.Logger;
@@ -55,11 +56,14 @@ public class PostgresSchema extends RelationalDatabaseSchema {
      *
      * @param config the connector configuration, which is presumed to be valid
      */
-    protected PostgresSchema(PostgresConnectorConfig config, TypeRegistry typeRegistry,
-                             TopicSelector<TableId> topicSelector, PostgresValueConverter valueConverter) {
+    protected PostgresSchema(PostgresConnectorConfig config,
+                             TypeRegistry typeRegistry,
+                             PostgresDefaultValueConverter defaultValueConverter,
+                             TopicSelector<TableId> topicSelector,
+                             PostgresValueConverter valueConverter) {
         super(config, topicSelector, new Filters(config).tableFilter(),
-                config.getColumnFilter(), getTableSchemaBuilder(config, valueConverter), false,
-                config.getKeyMapper());
+                config.getColumnFilter(), getTableSchemaBuilder(config, valueConverter, defaultValueConverter),
+                false, config.getKeyMapper());
 
         this.typeRegistry = typeRegistry;
         this.tableIdToToastableColumns = new HashMap<>();
@@ -67,9 +71,17 @@ public class PostgresSchema extends RelationalDatabaseSchema {
         this.readToastableColumns = config.skipRefreshSchemaOnMissingToastableData();
     }
 
-    private static TableSchemaBuilder getTableSchemaBuilder(PostgresConnectorConfig config, PostgresValueConverter valueConverter) {
-        return new TableSchemaBuilder(valueConverter, SchemaNameAdjuster.create(), config.customConverterRegistry(), config.getSourceInfoStructMaker().schema(),
-                config.getSanitizeFieldNames(), false);
+    private static TableSchemaBuilder getTableSchemaBuilder(
+            PostgresConnectorConfig config,
+            PostgresValueConverter valueConverter,
+            PostgresDefaultValueConverter defaultValueConverter) {
+        return new TableSchemaBuilder(valueConverter,
+                defaultValueConverter,
+                SchemaNameAdjuster.create(),
+                config.customConverterRegistry(),
+                config.getSourceInfoStructMaker().schema(),
+                config.getSanitizeFieldNames(),
+                false);
     }
 
     /**

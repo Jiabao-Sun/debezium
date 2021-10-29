@@ -83,15 +83,9 @@ public class HistoryRecordTest {
         assertThat(deserialized.ddl()).isEqualTo(ddl);
 
         System.out.println(record);
-        final DefaultValueConverter mockDefaultValueConverter = new DefaultValueConverter() {
-            @Override
-            public Optional<Object> parseDefaultValue(Column column, String defaultValue) {
-                return Optional.ofNullable(defaultValue);
-            }
-        };
 
         final TableChangesSerializer<Array> tableChangesSerializer = new JsonTableChangeSerializer();
-        assertThat((Object) tableChangesSerializer.deserialize(deserialized.tableChanges(), true, mockDefaultValueConverter)).isEqualTo(tableChanges);
+        assertThat((Object) tableChangesSerializer.deserialize(deserialized.tableChanges(), true)).isEqualTo(tableChanges);
 
         final TableChangesSerializer<List<Struct>> connectTableChangeSerializer = new ConnectTableChangeSerializer();
         Struct struct = connectTableChangeSerializer.serialize(tableChanges).get(0);

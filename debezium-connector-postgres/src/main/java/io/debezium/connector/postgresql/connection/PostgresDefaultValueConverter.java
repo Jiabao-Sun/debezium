@@ -17,6 +17,7 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import io.debezium.relational.DefaultValueConverter;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -36,7 +37,7 @@ import io.debezium.util.Collect;
  * Parses and converts column default values.
  */
 @ThreadSafe
-class PostgresDefaultValueConverter {
+public class PostgresDefaultValueConverter implements DefaultValueConverter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(PostgresDefaultValueConverter.class);
 
@@ -65,12 +66,17 @@ class PostgresDefaultValueConverter {
     private final PostgresValueConverter valueConverters;
     private final Map<String, DefaultValueMapper> defaultValueMappers;
 
-    PostgresDefaultValueConverter(PostgresValueConverter valueConverters, TimestampUtils timestampUtils) {
+    public PostgresDefaultValueConverter(PostgresValueConverter valueConverters, TimestampUtils timestampUtils) {
         this.valueConverters = valueConverters;
         this.defaultValueMappers = Collections.unmodifiableMap(createDefaultValueMappers(timestampUtils));
     }
 
-    Optional<Object> parseDefaultValue(Column column, String defaultValue) {
+    @Override
+    public Optional<Object> parseDefaultValue(Column column, String defaultValueExpression) {
+        if (defaultValueExpression == null) {
+            return Optional.empty();
+        }
+
         final String dataType = column.typeName();
 
         final DefaultValueMapper mapper = defaultValueMappers.get(dataType);
@@ -80,11 +86,11 @@ class PostgresDefaultValueConverter {
         }
 
         if (TRIM_DATA_TYPES.contains(dataType)) {
-            defaultValue = defaultValue.trim();
+            defaultValueExpression = defaultValueExpression.trim();
         }
 
         try {
-            Object rawDefaultValue = mapper.parse(defaultValue);
+            Object rawDefaultValue = mapper.parse(defaultValueExpression);
             Object convertedDefaultValue = convertDefaultValue(rawDefaultValue, column);
             if (convertedDefaultValue instanceof Struct) {
                 // Workaround for KAFKA-12694
@@ -94,7 +100,7 @@ class PostgresDefaultValueConverter {
             return Optional.of(convertedDefaultValue);
         }
         catch (Exception e) {
-            LOGGER.warn("Cannot parse column default value '{}' to type '{}'. Expression evaluation is not supported.", defaultValue, dataType);
+            LOGGER.warn("Cannot parse column default value '{}' to type '{}'. Expression evaluation is not supported.", defaultValueExpression, dataType);
             LOGGER.debug("Parsing failed due to error", e);
             return Optional.empty();
         }

@@ -56,6 +56,7 @@ public class MySqlDefaultValueTest {
         tables = new Tables();
         tableSchemaBuilder = new TableSchemaBuilder(
                 converters,
+                new MySqlDefaultValueConverter(converters),
                 SchemaNameAdjuster.create(), new CustomConverterRegistry(null), SchemaBuilder.struct().build(), false, false);
 
     }

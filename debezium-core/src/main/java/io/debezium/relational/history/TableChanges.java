@@ -164,7 +164,7 @@ public class TableChanges implements Iterable<TableChange> {
          * the catalog and the second as the table name, or false if the first should be used as the schema and the
          * second as the table name
          */
-        TableChanges deserialize(T data, boolean useCatalogBeforeSchema, DefaultValueConverter defaultValueConverter);
+        TableChanges deserialize(T data, boolean useCatalogBeforeSchema);
     }
 
     public enum TableChangeType {

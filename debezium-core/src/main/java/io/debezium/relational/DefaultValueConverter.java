@@ -18,14 +18,14 @@ import java.util.Optional;
 public interface DefaultValueConverter {
 
     /**
-     * This interface is used to convert the string default value to a Java type
+     * This interface is used to convert the default value literal to a Java type
      * recognized by value converters for a subset of types.
      *
      * @param column the column definition describing the {@code data} value; never null
-     * @param defaultValue the default value; may be null
+     * @param defaultValueExpression the default value literal; may be null
      * @return value converted to a Java type; optional
      */
-    Optional<Object> parseDefaultValue(Column column, String defaultValue);
+    Optional<Object> parseDefaultValue(Column column, String defaultValueExpression);
 
     /**
      * Parse default value expression and set column's default value.
