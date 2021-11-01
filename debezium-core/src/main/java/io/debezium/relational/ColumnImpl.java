@@ -137,7 +137,6 @@ final class ColumnImpl implements Column, Comparable<Column> {
         return Optional.ofNullable(defaultValueExpression);
     }
 
-
     public Object defaultValue() {
         return null;
     }

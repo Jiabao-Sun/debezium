@@ -21,7 +21,6 @@ import io.debezium.config.Configuration;
 import io.debezium.config.Field;
 import io.debezium.document.Array;
 import io.debezium.function.Predicates;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.Tables;
 import io.debezium.relational.ddl.DdlParser;
 import io.debezium.relational.history.TableChanges.TableChange;
@@ -97,7 +96,7 @@ public abstract class AbstractDatabaseHistory implements DatabaseHistory {
     }
 
     @Override
-    public final void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser, DefaultValueConverter defaultValueConverter) {
+    public final void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser) {
         logger.debug("Recovering DDL history for source partition {} and offset {}", source, position);
         listener.recoveryStarted();
         HistoryRecord stopPoint = new HistoryRecord(source, position, null, null, null, null);
@@ -108,7 +107,7 @@ public abstract class AbstractDatabaseHistory implements DatabaseHistory {
                 String ddl = recovered.ddl();
 
                 if (!preferDdl && tableChanges != null && !tableChanges.isEmpty()) {
-                    TableChanges changes = tableChangesSerializer.deserialize(tableChanges, useCatalogBeforeSchema, defaultValueConverter);
+                    TableChanges changes = tableChangesSerializer.deserialize(tableChanges, useCatalogBeforeSchema);
                     for (TableChange entry : changes) {
                         if (entry.getType() == TableChangeType.CREATE || entry.getType() == TableChangeType.ALTER) {
                             schema.overwriteTable(entry.getTable());

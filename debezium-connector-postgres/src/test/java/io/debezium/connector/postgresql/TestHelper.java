@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.postgresql.jdbc.PgConnection;
+import org.postgresql.jdbc.TimestampUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -201,14 +202,29 @@ public final class TestHelper {
         }
     }
 
-    public static PostgresSchema getSchema(PostgresConnectorConfig config) {
-        return getSchema(config, TestHelper.getTypeRegistry());
+    public static TimestampUtils getTimeStampUtils() {
+        final PostgresConnectorConfig config = new PostgresConnectorConfig(defaultConfig().build());
+        try (final PostgresConnection connection = new PostgresConnection(config.getJdbcConfig(), getPostgresValueConverterBuilder(config))) {
+            return connection.getTimestampUtils();
+        }
     }
 
-    public static PostgresSchema getSchema(PostgresConnectorConfig config, TypeRegistry typeRegistry) {
+    public static Charset getDatabaseCharset() {
+        final PostgresConnectorConfig config = new PostgresConnectorConfig(defaultConfig().build());
+        try (final PostgresConnection connection = new PostgresConnection(config.getJdbcConfig(), getPostgresValueConverterBuilder(config))) {
+            return connection.getDatabaseCharset();
+        }
+    }
+
+    public static PostgresSchema getSchema(PostgresConnectorConfig config) {
+        return getSchema(config, TestHelper.getTypeRegistry(), TestHelper.getTimeStampUtils());
+    }
+
+    public static PostgresSchema getSchema(PostgresConnectorConfig config, TypeRegistry typeRegistry, TimestampUtils timestampUtils) {
         return new PostgresSchema(
                 config,
                 typeRegistry,
+                timestampUtils,
                 PostgresTopicSelector.create(config),
                 getPostgresValueConverter(typeRegistry, config));
     }

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.errors.RetriableException;
 import org.apache.kafka.connect.source.SourceRecord;
+import org.postgresql.jdbc.TimestampUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,8 +93,9 @@ public class PostgresConnectorTask extends BaseSourceTask<PostgresPartition, Pos
         }
 
         final TypeRegistry typeRegistry = jdbcConnection.getTypeRegistry();
+        final TimestampUtils timestampUtils = jdbcConnection.getTimestampUtils();
 
-        schema = new PostgresSchema(connectorConfig, typeRegistry, jdbcConnection.getDefaultValueConverter(), topicSelector, valueConverterBuilder.build(typeRegistry));
+        schema = new PostgresSchema(connectorConfig, typeRegistry, timestampUtils, topicSelector, valueConverterBuilder.build(typeRegistry));
         this.taskContext = new PostgresTaskContext(connectorConfig, schema, topicSelector);
         final Offsets<PostgresPartition, PostgresOffsetContext> previousOffsets = getPreviousOffsets(
                 new PostgresPartition.Provider(connectorConfig), new PostgresOffsetContext.Loader(connectorConfig));

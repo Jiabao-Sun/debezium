@@ -51,7 +51,6 @@ import io.debezium.data.VerifyRecord;
 import io.debezium.doc.FixFor;
 import io.debezium.embedded.AbstractConnectorTest;
 import io.debezium.junit.logging.LogInterceptor;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.RelationalDatabaseConnectorConfig;
 import io.debezium.relational.Tables;
 import io.debezium.relational.ddl.DdlParser;
@@ -2580,8 +2579,8 @@ public class SqlServerConnectorIT extends AbstractConnectorTest {
         }
 
         @Override
-        public void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser, DefaultValueConverter defaultValueConverter) {
-            delegate.recover(source, position, schema, ddlParser, defaultValueConverter);
+        public void recover(Map<String, ?> source, Map<String, ?> position, Tables schema, DdlParser ddlParser) {
+            delegate.recover(source, position, schema, ddlParser);
         }
 
         @Override

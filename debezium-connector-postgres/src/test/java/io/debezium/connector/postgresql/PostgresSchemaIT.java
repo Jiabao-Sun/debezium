@@ -32,8 +32,10 @@ import org.apache.kafka.connect.data.SchemaBuilder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.postgresql.jdbc.TimestampUtils;
 
 import io.debezium.connector.postgresql.connection.PostgresConnection;
+import io.debezium.connector.postgresql.connection.PostgresDefaultValueConverter;
 import io.debezium.connector.postgresql.data.Ltree;
 import io.debezium.data.Bits;
 import io.debezium.data.Json;
@@ -79,6 +81,7 @@ public class PostgresSchemaIT {
     };
 
     private PostgresSchema schema;
+    private PostgresDefaultValueConverter defaultValueConverter;
 
     @Before
     public void before() throws SQLException {
@@ -210,7 +213,8 @@ public class PostgresSchemaIT {
         TestHelper.execute(statements);
         PostgresConnectorConfig config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(SCHEMA_EXCLUDE_LIST, "s1").build());
         final TypeRegistry typeRegistry = TestHelper.getTypeRegistry();
-        schema = TestHelper.getSchema(config, typeRegistry);
+        final TimestampUtils timestampUtils = TestHelper.getTimeStampUtils();
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s2.a", "s2.b");
@@ -218,7 +222,7 @@ public class PostgresSchemaIT {
         }
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(SCHEMA_BLACKLIST, "s1").build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s2.a", "s2.b");
@@ -226,21 +230,21 @@ public class PostgresSchemaIT {
         }
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(SCHEMA_EXCLUDE_LIST, "s.*").build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.create()) {
             schema.refresh(connection, false);
             assertTablesExcluded("s1.a", "s2.a", "s1.b", "s2.b");
         }
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(SCHEMA_BLACKLIST, "s.*").build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.create()) {
             schema.refresh(connection, false);
             assertTablesExcluded("s1.a", "s2.a", "s1.b", "s2.b");
         }
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.TABLE_EXCLUDE_LIST, "s1.A,s2.A").build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s1.b", "s2.b");
@@ -248,7 +252,7 @@ public class PostgresSchemaIT {
         }
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.TABLE_BLACKLIST, "s1.A,s2.A").build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s1.b", "s2.b");
@@ -259,7 +263,7 @@ public class PostgresSchemaIT {
                 .with(SCHEMA_EXCLUDE_LIST, "s2")
                 .with(PostgresConnectorConfig.TABLE_EXCLUDE_LIST, "s1.A")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s1.b");
@@ -270,7 +274,7 @@ public class PostgresSchemaIT {
                 .with(SCHEMA_BLACKLIST, "s2")
                 .with(PostgresConnectorConfig.TABLE_BLACKLIST, "s1.A")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertTablesIncluded("s1.b");
@@ -279,7 +283,7 @@ public class PostgresSchemaIT {
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.COLUMN_EXCLUDE_LIST, ".*aa")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertColumnsExcluded("s1.a.aa", "s2.a.aa");
@@ -287,7 +291,7 @@ public class PostgresSchemaIT {
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.COLUMN_BLACKLIST, ".*aa")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertColumnsExcluded("s1.a.aa", "s2.a.aa");
@@ -295,7 +299,7 @@ public class PostgresSchemaIT {
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.COLUMN_INCLUDE_LIST, ".*bb")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertColumnsExcluded("s1.a.aa", "s2.a.aa");
@@ -303,7 +307,7 @@ public class PostgresSchemaIT {
 
         config = new PostgresConnectorConfig(TestHelper.defaultConfig().with(PostgresConnectorConfig.COLUMN_WHITELIST, ".*bb")
                 .build());
-        schema = TestHelper.getSchema(config, typeRegistry);
+        schema = TestHelper.getSchema(config, typeRegistry, timestampUtils);
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             schema.refresh(connection, false);
             assertColumnsExcluded("s1.a.aa", "s2.a.aa");
@@ -445,6 +449,14 @@ public class PostgresSchemaIT {
         PostgresConnectorConfig config = new PostgresConnectorConfig(TestHelper.defaultConfig().build());
         schema = TestHelper.getSchema(config);
 
+        final PostgresConnection.PostgresValueConverterBuilder valueConverterBuilder = (typeRegistry) -> PostgresValueConverter.of(
+                config,
+                TestHelper.getDatabaseCharset(),
+                typeRegistry);
+
+        defaultValueConverter = new PostgresDefaultValueConverter(valueConverterBuilder.build(TestHelper.getTypeRegistry()),
+                TestHelper.getTimeStampUtils());
+
         try (PostgresConnection connection = TestHelper.createWithTypeRegistry()) {
             connection.execute(ddl);
             schema.refresh(connection, false);
@@ -507,17 +519,19 @@ public class PostgresSchemaIT {
     private void assertColumnDefault(String columnName, Object expectedDefault, List<Column> columns) {
         Column column = columns.stream().filter(c -> c.name().equals(columnName)).findFirst().get();
 
+        Object defaultValue = defaultValueConverter.parseDefaultValue(column, column.defaultValueExpression().orElse(null));
+
         if (expectedDefault instanceof byte[]) {
             byte[] expectedBytes = (byte[]) expectedDefault;
-            byte[] defaultBytes = (byte[]) column.defaultValue();
+            byte[] defaultBytes = (byte[]) defaultValue;
             assertArrayEquals(expectedBytes, defaultBytes);
         }
         else {
-            if (Objects.isNull(column.defaultValue())) {
+            if (Objects.isNull(defaultValue)) {
                 assertTrue(Objects.isNull(expectedDefault));
             }
             else {
-                assertTrue(column.defaultValue().equals(expectedDefault));
+                assertTrue(defaultValue.equals(expectedDefault));
             }
         }
     }

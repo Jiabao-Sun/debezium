@@ -21,15 +21,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.kafka.connect.data.Field;
-import org.apache.kafka.connect.data.Schema;
-import org.apache.kafka.connect.data.SchemaBuilder;
-
 import io.debezium.annotation.Immutable;
 import io.debezium.relational.Column;
-import io.debezium.relational.ColumnEditor;
 import io.debezium.relational.DefaultValueConverter;
-import io.debezium.relational.ValueConverter;
 import io.debezium.util.Collect;
 
 /**

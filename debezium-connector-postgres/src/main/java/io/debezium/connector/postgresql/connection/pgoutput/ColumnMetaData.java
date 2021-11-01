@@ -38,7 +38,8 @@ public class ColumnMetaData {
      * @param defaultValueExpression the parsed default value literal for the column
      * @param typeModifier the attribute type modifier
      */
-    ColumnMetaData(String columnName, PostgresType postgresType, boolean key, boolean optional, boolean hasDefaultValue, String defaultValueExpression, int typeModifier) {
+    ColumnMetaData(String columnName, PostgresType postgresType, boolean key, boolean optional, boolean hasDefaultValue, String defaultValueExpression,
+                   int typeModifier) {
         this.columnName = columnName;
         this.postgresType = postgresType;
         this.key = key;

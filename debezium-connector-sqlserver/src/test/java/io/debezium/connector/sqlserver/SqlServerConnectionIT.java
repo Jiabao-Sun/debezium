@@ -37,6 +37,7 @@ import io.debezium.util.Testing;
 public class SqlServerConnectionIT {
 
     private ZoneOffset databaseZoneOffset;
+    private SqlServerDefaultValueConverter defaultValueConverter;
 
     @Before
     public void before() throws SQLException {
@@ -303,6 +304,8 @@ public class SqlServerConnectionIT {
 
             connection.execute(sql);
 
+            defaultValueConverter = connection.getDefaultValueConverter();
+
             // then enable CDC and wrapper functions
             TestHelper.enableTableCdc(connection, "table_with_defaults");
             // insert some data
@@ -405,11 +408,14 @@ public class SqlServerConnectionIT {
 
     private void assertColumnHasDefaultValue(Table table, String columnName, Object expectedValue) {
         Column column = table.columnWithName(columnName);
+
+        Object defaultValue = defaultValueConverter.parseDefaultValue(column, column.defaultValueExpression().orElse(null));
+
         Assertions.assertThat(column.hasDefaultValue()).isTrue();
-        Assertions.assertThat(column.defaultValue()).isEqualTo(expectedValue);
+        Assertions.assertThat(defaultValue).isEqualTo(expectedValue);
         if (expectedValue instanceof BigDecimal) {
             // safe cast as we know the expectedValue and column.defaultValue are equal
-            BigDecimal columnValue = (BigDecimal) column.defaultValue();
+            BigDecimal columnValue = (BigDecimal) defaultValue;
             BigDecimal expectedBigDecimal = (BigDecimal) expectedValue;
             Assertions.assertThat(column.scale().isPresent()).isTrue();
             int columnScale = column.scale().get();

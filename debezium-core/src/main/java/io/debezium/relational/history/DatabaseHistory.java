@@ -13,7 +13,6 @@ import org.apache.kafka.common.config.ConfigDef.Width;
 
 import io.debezium.config.Configuration;
 import io.debezium.config.Field;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.Tables;
 import io.debezium.relational.ddl.DdlParser;
 

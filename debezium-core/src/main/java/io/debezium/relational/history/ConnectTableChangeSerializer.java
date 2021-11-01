@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.debezium.relational.Column;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.Table;
 import io.debezium.relational.history.TableChanges.TableChange;
 import io.debezium.util.SchemaNameAdjuster;

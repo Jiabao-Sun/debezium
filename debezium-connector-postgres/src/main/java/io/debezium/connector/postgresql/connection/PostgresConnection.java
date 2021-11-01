@@ -72,7 +72,6 @@ public class PostgresConnection extends JdbcConnection {
     private static final Duration PAUSE_BETWEEN_REPLICATION_SLOT_RETRIEVAL_ATTEMPTS = Duration.ofSeconds(2);
 
     private final TypeRegistry typeRegistry;
-    private final PostgresDefaultValueConverter defaultValueConverter;
 
     /**
      * Creates a Postgres connection using the supplied configuration.
@@ -88,13 +87,9 @@ public class PostgresConnection extends JdbcConnection {
 
         if (Objects.isNull(valueConverterBuilder)) {
             this.typeRegistry = null;
-            this.defaultValueConverter = null;
         }
         else {
             this.typeRegistry = new TypeRegistry(this);
-
-            final PostgresValueConverter valueConverter = valueConverterBuilder.build(this.typeRegistry);
-            this.defaultValueConverter = new PostgresDefaultValueConverter(valueConverter, this.getTimestampUtils());
         }
     }
 
@@ -107,12 +102,9 @@ public class PostgresConnection extends JdbcConnection {
         super(config, FACTORY, PostgresConnection::validateServerVersion, PostgresConnection::defaultSettings, "\"", "\"");
         if (Objects.isNull(typeRegistry)) {
             this.typeRegistry = null;
-            this.defaultValueConverter = null;
         }
         else {
             this.typeRegistry = typeRegistry;
-            final PostgresValueConverter valueConverter = PostgresValueConverter.of(new PostgresConnectorConfig(config), this.getDatabaseCharset(), typeRegistry);
-            this.defaultValueConverter = new PostgresDefaultValueConverter(valueConverter, this.getTimestampUtils());
         }
     }
 
@@ -576,10 +568,6 @@ public class PostgresConnection extends JdbcConnection {
         }
 
         return Optional.empty();
-    }
-
-    public PostgresDefaultValueConverter getDefaultValueConverter() {
-        return defaultValueConverter;
     }
 
     public TypeRegistry getTypeRegistry() {

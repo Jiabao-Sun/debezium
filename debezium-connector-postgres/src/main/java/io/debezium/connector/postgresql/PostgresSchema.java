@@ -13,14 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.debezium.connector.postgresql.connection.PostgresDefaultValueConverter;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.errors.ConnectException;
+import org.postgresql.jdbc.TimestampUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.debezium.annotation.NotThreadSafe;
 import io.debezium.connector.postgresql.connection.PostgresConnection;
+import io.debezium.connector.postgresql.connection.PostgresDefaultValueConverter;
 import io.debezium.connector.postgresql.connection.ServerInfo;
 import io.debezium.jdbc.JdbcConnection;
 import io.debezium.relational.RelationalDatabaseSchema;
@@ -58,11 +59,11 @@ public class PostgresSchema extends RelationalDatabaseSchema {
      */
     protected PostgresSchema(PostgresConnectorConfig config,
                              TypeRegistry typeRegistry,
-                             PostgresDefaultValueConverter defaultValueConverter,
+                             TimestampUtils timestampUtils,
                              TopicSelector<TableId> topicSelector,
                              PostgresValueConverter valueConverter) {
         super(config, topicSelector, new Filters(config).tableFilter(),
-                config.getColumnFilter(), getTableSchemaBuilder(config, valueConverter, defaultValueConverter),
+                config.getColumnFilter(), getTableSchemaBuilder(config, valueConverter, timestampUtils),
                 false, config.getKeyMapper());
 
         this.typeRegistry = typeRegistry;
@@ -72,11 +73,11 @@ public class PostgresSchema extends RelationalDatabaseSchema {
     }
 
     private static TableSchemaBuilder getTableSchemaBuilder(
-            PostgresConnectorConfig config,
-            PostgresValueConverter valueConverter,
-            PostgresDefaultValueConverter defaultValueConverter) {
+                                                            PostgresConnectorConfig config,
+                                                            PostgresValueConverter valueConverter,
+                                                            TimestampUtils timestampUtils) {
         return new TableSchemaBuilder(valueConverter,
-                defaultValueConverter,
+                new PostgresDefaultValueConverter(valueConverter, timestampUtils),
                 SchemaNameAdjuster.create(),
                 config.customConverterRegistry(),
                 config.getSourceInfoStructMaker().schema(),

@@ -8,7 +8,6 @@ package io.debezium.connector.mysql.antlr.listener;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.debezium.connector.mysql.MySqlValueConverters;
 import io.debezium.ddl.parser.mysql.generated.MySqlParser.CurrentTimestampContext;
 import io.debezium.ddl.parser.mysql.generated.MySqlParser.DefaultValueContext;
 import io.debezium.ddl.parser.mysql.generated.MySqlParserBaseListener;

@@ -26,11 +26,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import io.debezium.config.Configuration;
-import io.debezium.connector.mysql.MySqlDefaultValueConverter;
 import io.debezium.connector.mysql.antlr.MySqlAntlrDdlParser;
 import io.debezium.doc.FixFor;
 import io.debezium.kafka.KafkaCluster;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.Tables;
 import io.debezium.relational.ddl.DdlParser;
 import io.debezium.text.ParsingException;
@@ -135,14 +133,13 @@ public class KafkaDatabaseHistoryTest {
         DdlParser recoveryParser = new MySqlAntlrDdlParser();
         DdlParser ddlParser = new MySqlAntlrDdlParser();
         ddlParser.setCurrentSchema("db1"); // recover does this, so we need to as well
-        DefaultValueConverter defaultValueConverter = new MySqlDefaultValueConverter(null);
         Tables tables1 = new Tables();
         Tables tables2 = new Tables();
         Tables tables3 = new Tables();
 
         // Recover from the very beginning ...
         setLogPosition(0);
-        history.recover(source, position, tables1, recoveryParser, defaultValueConverter);
+        history.recover(source, position, tables1, recoveryParser);
 
         // There should have been nothing to recover ...
         assertThat(tables1.size()).isEqualTo(0);
@@ -187,25 +184,25 @@ public class KafkaDatabaseHistoryTest {
         // Recover from the very beginning to just past the first change ...
         Tables recoveredTables = new Tables();
         setLogPosition(15);
-        history.recover(source, position, recoveredTables, recoveryParser, defaultValueConverter);
+        history.recover(source, position, recoveredTables, recoveryParser);
         assertThat(recoveredTables).isEqualTo(tables1);
 
         // Recover from the very beginning to just past the second change ...
         recoveredTables = new Tables();
         setLogPosition(50);
-        history.recover(source, position, recoveredTables, recoveryParser, defaultValueConverter);
+        history.recover(source, position, recoveredTables, recoveryParser);
         assertThat(recoveredTables).isEqualTo(tables2);
 
         // Recover from the very beginning to just past the third change ...
         recoveredTables = new Tables();
         setLogPosition(10010);
-        history.recover(source, position, recoveredTables, recoveryParser, defaultValueConverter);
+        history.recover(source, position, recoveredTables, recoveryParser);
         assertThat(recoveredTables).isEqualTo(tables3);
 
         // Recover from the very beginning to way past the third change ...
         recoveredTables = new Tables();
         setLogPosition(100000010);
-        history.recover(source, position, recoveredTables, recoveryParser, defaultValueConverter);
+        history.recover(source, position, recoveredTables, recoveryParser);
         assertThat(recoveredTables).isEqualTo(tables3);
     }
 

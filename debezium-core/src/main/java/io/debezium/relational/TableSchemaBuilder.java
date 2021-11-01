@@ -385,7 +385,11 @@ public class TableSchemaBuilder {
      * @param mapper the mapping function for the column; may be null if the columns is not to be mapped to different values
      */
     protected void addField(SchemaBuilder builder, Table table, Column column, ColumnMapper mapper) {
-        final SchemaBuilder fieldBuilder = customConverterRegistry.registerConverterFor(table.id(), column)
+        final Object defaultValue = column.defaultValueExpression()
+                .map(e -> defaultValueConverter.parseDefaultValue(column, e))
+                .orElse(null);
+
+        final SchemaBuilder fieldBuilder = customConverterRegistry.registerConverterFor(table.id(), column, defaultValue)
                 .orElse(valueConverterProvider.schemaBuilder(column));
 
         if (fieldBuilder != null) {
@@ -399,11 +403,6 @@ public class TableSchemaBuilder {
 
             // if the default value is provided
             if (column.hasDefaultValue()) {
-                Object defaultValue = column.defaultValueExpression();
-                if (defaultValueConverter != null) {
-                    defaultValue = defaultValueConverter.parseDefaultValue(column, column.defaultValueExpression());
-                }
-
                 fieldBuilder
                         .defaultValue(customConverterRegistry.getValueConverter(table.id(), column)
                                 .orElse(ValueConverter.passthrough()).convert(defaultValue));
