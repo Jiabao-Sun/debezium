@@ -167,16 +167,6 @@ public class JsonTableChangeSerializer implements TableChanges.TableChangesSeria
                         columnEditor.defaultValueExpression(defaultValueExpression);
                     }
 
-                    Boolean hasDefaultValue = v.getBoolean("hasDefaultValue");
-                    if (hasDefaultValue != null && hasDefaultValue) {
-                        if (defaultValueExpression != null && defaultValueConverter != null) {
-                            columnEditor = defaultValueConverter.setColumnDefaultValue(columnEditor);
-                        }
-                        else {
-                            columnEditor = columnEditor.defaultValue(null);
-                        }
-                    }
-
                     Array enumValues = v.getArray("enumValues");
                     if (enumValues != null && !enumValues.isEmpty()) {
                         List<String> enumValueList = enumValues.streamValues()

@@ -27,16 +27,4 @@ public interface DefaultValueConverter {
      */
     Optional<Object> parseDefaultValue(Column column, String defaultValueExpression);
 
-    /**
-     * Parse default value expression and set column's default value.
-     * @param columnEditor
-     * @return
-     */
-    default ColumnEditor setColumnDefaultValue(ColumnEditor columnEditor) {
-        Column column = columnEditor.create();
-        return parseDefaultValue(column, column.defaultValueExpression())
-                .map(defaultValue -> column.edit().defaultValue(defaultValue))
-                .orElse(column.edit());
-    }
-
 }

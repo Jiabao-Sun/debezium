@@ -419,29 +419,4 @@ public class MySqlDefaultValueConverter implements DefaultValueConverter {
         return sb.toString();
     }
 
-    @Override
-    public ColumnEditor setColumnDefaultValue(ColumnEditor columnEditor) {
-        final Column column = columnEditor.create();
-
-        // if converters is not null and the default value is not null, we need to convert default value
-        if (converters != null && columnEditor.defaultValueExpression() != null) {
-            String defaultValueExpression = columnEditor.defaultValueExpression();
-            final SchemaBuilder schemaBuilder = converters.schemaBuilder(column);
-            if (schemaBuilder == null) {
-                return columnEditor;
-            }
-            final Schema schema = schemaBuilder.build();
-            // In order to get the valueConverter for this column, we have to create a field;
-            // The index value -1 in the field will never used when converting default value;
-            // So we can set any number here;
-            final Field field = new Field(columnEditor.name(), -1, schema);
-            final ValueConverter valueConverter = converters.converter(columnEditor.create(), field);
-
-            Object defaultValue = convert(column, defaultValueExpression);
-            defaultValue = valueConverter.convert(defaultValue);
-            columnEditor.defaultValue(defaultValue);
-        }
-        return columnEditor;
-    }
-
 }

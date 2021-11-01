@@ -10,7 +10,6 @@ import static org.fest.assertions.Assertions.assertThat;
 import java.sql.Types;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.kafka.connect.data.Struct;
 import org.junit.Test;
@@ -18,7 +17,6 @@ import org.junit.Test;
 import io.debezium.document.Array;
 import io.debezium.document.DocumentReader;
 import io.debezium.relational.Column;
-import io.debezium.relational.DefaultValueConverter;
 import io.debezium.relational.Table;
 import io.debezium.relational.TableId;
 import io.debezium.relational.history.TableChanges.TableChangesSerializer;
@@ -54,7 +52,6 @@ public class HistoryRecordTest {
                         .type("ENUM", "ENUM")
                         .optional(false)
                         .defaultValueExpression("1")
-                        .defaultValue("1")
                         .enumValues(Collect.arrayListOf("1", "2"))
                         .create())
                 .setPrimaryKeyNames("first")

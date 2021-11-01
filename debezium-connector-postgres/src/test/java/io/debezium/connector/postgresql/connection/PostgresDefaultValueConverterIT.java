@@ -50,17 +50,17 @@ public class PostgresDefaultValueConverterIT {
         final PostgresDefaultValueConverter postgresDefaultValueConverter = new PostgresDefaultValueConverter(
                 postgresValueConverter, postgresConnection.getTimestampUtils());
 
-        final Column NumericalColumn = Column.editor().type("int8").jdbcType(Types.INTEGER).defaultValue(" 1 ").create();
+        final Column NumericalColumn = Column.editor().type("int8").jdbcType(Types.INTEGER).defaultValueExpression(" 1 ").create();
         final Optional<Object> numericalConvertedValue = postgresDefaultValueConverter.parseDefaultValue(
                 NumericalColumn,
-                (String) NumericalColumn.defaultValue());
+                NumericalColumn.defaultValueExpression().orElse(null));
 
         Assert.assertEquals(numericalConvertedValue, Optional.of(1));
 
-        final Column nonNumericalColumn = Column.editor().type("text").jdbcType(Types.VARCHAR).defaultValue(" 1 ").create();
+        final Column nonNumericalColumn = Column.editor().type("text").jdbcType(Types.VARCHAR).defaultValueExpression(" 1 ").create();
         final Optional<Object> nonNumericalConvertedValue = postgresDefaultValueConverter.parseDefaultValue(
                 nonNumericalColumn,
-                (String) nonNumericalColumn.defaultValue());
+                NumericalColumn.defaultValueExpression().orElse(null));
 
         Assert.assertEquals(nonNumericalConvertedValue, Optional.of(" 1 "));
     }

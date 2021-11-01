@@ -374,11 +374,8 @@ public class PostgresChangeRecordEmitter extends RelationalChangeRecordEmitter {
                             // the current default read from the database
                             Optional.ofNullable(table.columnWithName(column.getName()))
                                     .map(Column::defaultValueExpression)
+                                    .map(Optional::get)
                                     .ifPresent(columnEditor::defaultValueExpression);
-
-                            Optional.ofNullable(table.columnWithName(column.getName()))
-                                    .map(Column::defaultValue)
-                                    .ifPresent(columnEditor::defaultValue);
 
                             return columnEditor.create();
                         })
