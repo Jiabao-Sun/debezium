@@ -65,22 +65,6 @@ public class TableSchemaBuilder {
      *
      * @param valueConverterProvider the provider for obtaining {@link ValueConverter}s and {@link SchemaBuilder}s; may not be
      *            null
-     * @param schemaNameAdjuster the adjuster for schema names; may not be null
-     */
-    public TableSchemaBuilder(ValueConverterProvider valueConverterProvider,
-                              SchemaNameAdjuster schemaNameAdjuster,
-                              CustomConverterRegistry customConverterRegistry,
-                              Schema sourceInfoSchema,
-                              boolean sanitizeFieldNames, boolean multiPartitionMode) {
-        this(valueConverterProvider, null, schemaNameAdjuster,
-                customConverterRegistry, sourceInfoSchema, sanitizeFieldNames, multiPartitionMode);
-    }
-
-    /**
-     * Create a new instance of the builder.
-     *
-     * @param valueConverterProvider the provider for obtaining {@link ValueConverter}s and {@link SchemaBuilder}s; may not be
-     *            null
      * @param defaultValueConverter is used to convert the default value literal to a Java type
      *            recognized by value converters for a subset of types. may be null.
      * @param schemaNameAdjuster the adjuster for schema names; may not be null
