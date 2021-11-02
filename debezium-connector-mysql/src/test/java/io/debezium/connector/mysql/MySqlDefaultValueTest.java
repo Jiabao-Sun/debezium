@@ -192,6 +192,11 @@ public class MySqlDefaultValueTest {
                 JdbcValueConverters.BigIntUnsignedMode.PRECISE,
                 BinaryHandlingMode.BYTES);
         final AbstractDdlParser parser = new MySqlAntlrDdlParser(converters);
+        final TableSchemaBuilder tableSchemaBuilder = new TableSchemaBuilder(
+                converters,
+                new MySqlDefaultValueConverter(converters),
+                SchemaNameAdjuster.create(), new CustomConverterRegistry(null), SchemaBuilder.struct().build(), false, false);
+
         String sql = "CREATE TABLE UNSIGNED_BIGINT_TABLE (\n" +
                 "  A BIGINT UNSIGNED NULL DEFAULT 0,\n" +
                 "  B BIGINT UNSIGNED NULL DEFAULT '10',\n" +
@@ -203,16 +208,16 @@ public class MySqlDefaultValueTest {
                 ");";
         parser.parse(sql, tables);
         Table table = tables.forTable(new TableId(null, null, "UNSIGNED_BIGINT_TABLE"));
-        assertThat(getColumnSchema(table, "A").defaultValue()).isEqualTo(BigDecimal.ZERO);
-        assertThat(getColumnSchema(table, "B").defaultValue()).isEqualTo(new BigDecimal(10));
+        assertThat(getColumnSchema(table, "A", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "B", tableSchemaBuilder).defaultValue()).isEqualTo(new BigDecimal(10));
         assertThat(table.columnWithName("C").isOptional()).isEqualTo(true);
         assertThat(table.columnWithName("C").hasDefaultValue()).isTrue();
         assertThat(table.columnWithName("D").isOptional()).isEqualTo(false);
         assertThat(table.columnWithName("D").hasDefaultValue()).isFalse();
         assertThat(table.columnWithName("E").isOptional()).isEqualTo(false);
-        assertThat(getColumnSchema(table, "E").defaultValue()).isEqualTo(BigDecimal.ZERO);
-        assertThat(getColumnSchema(table, "F").defaultValue()).isEqualTo(BigDecimal.ZERO);
-        assertThat(getColumnSchema(table, "G").defaultValue()).isEqualTo(new BigDecimal("18446744073709551615"));
+        assertThat(getColumnSchema(table, "E", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "F", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "G", tableSchemaBuilder).defaultValue()).isEqualTo(new BigDecimal("18446744073709551615"));
     }
 
     @Test
@@ -344,6 +349,10 @@ public class MySqlDefaultValueTest {
                 JdbcValueConverters.BigIntUnsignedMode.LONG,
                 BinaryHandlingMode.BYTES);
         final AbstractDdlParser parser = new MySqlAntlrDdlParser(converters);
+        final TableSchemaBuilder tableSchemaBuilder = new TableSchemaBuilder(
+                converters,
+                new MySqlDefaultValueConverter(converters),
+                SchemaNameAdjuster.create(), new CustomConverterRegistry(null), SchemaBuilder.struct().build(), false, false);
         String sql = "CREATE TABLE NUMERIC_DECIMAL_TABLE (\n" +
                 "  A NUMERIC NOT NULL DEFAULT 1.23,\n" +
                 "  B DECIMAL(5,3) NOT NULL DEFAULT 2.321,\n" +
@@ -351,9 +360,9 @@ public class MySqlDefaultValueTest {
                 ");";
         parser.parse(sql, tables);
         Table table = tables.forTable(new TableId(null, null, "NUMERIC_DECIMAL_TABLE"));
-        assertThat(getColumnSchema(table, "A").defaultValue()).isEqualTo(BigDecimal.valueOf(1));
-        assertThat(getColumnSchema(table, "B").defaultValue()).isEqualTo(BigDecimal.valueOf(2.321));
-        assertThat(getColumnSchema(table, "C").defaultValue()).isEqualTo(BigDecimal.valueOf(13));
+        assertThat(getColumnSchema(table, "A", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.valueOf(1));
+        assertThat(getColumnSchema(table, "B", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.valueOf(2.321));
+        assertThat(getColumnSchema(table, "C", tableSchemaBuilder).defaultValue()).isEqualTo(BigDecimal.valueOf(13));
     }
 
     @Test
@@ -532,6 +541,10 @@ public class MySqlDefaultValueTest {
     }
 
     private Schema getColumnSchema(Table table, String column) {
+        return getColumnSchema(table, column, tableSchemaBuilder);
+    }
+
+    private Schema getColumnSchema(Table table, String column, TableSchemaBuilder tableSchemaBuilder) {
         TableSchema schema = tableSchemaBuilder.create("test", "dummy", table, null, null, null);
         return schema.getEnvelopeSchema().schema().field("after").schema().field(column).schema();
     }
