@@ -372,7 +372,7 @@ public class TableSchemaBuilder {
      */
     protected void addField(SchemaBuilder builder, Table table, Column column, ColumnMapper mapper) {
         final Object defaultValue = column.defaultValueExpression()
-                .map(e -> defaultValueConverter.parseDefaultValue(column, e))
+                .flatMap(e -> defaultValueConverter.parseDefaultValue(column, e))
                 .orElse(null);
 
         final SchemaBuilder fieldBuilder = customConverterRegistry.registerConverterFor(table.id(), column, defaultValue)
