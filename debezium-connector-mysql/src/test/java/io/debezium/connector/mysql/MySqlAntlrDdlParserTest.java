@@ -70,9 +70,10 @@ public class MySqlAntlrDdlParserTest {
         listener = new SimpleDdlParserListener();
         parser = new MysqlDdlParserWithSimpleTestListener(listener);
         tables = new Tables();
-        converters = new MySqlValueConverters(JdbcValueConverters.DecimalMode.DOUBLE,
-                TemporalPrecisionMode.CONNECT,
-                JdbcValueConverters.BigIntUnsignedMode.LONG,
+        converters = new MySqlValueConverters(
+                JdbcValueConverters.DecimalMode.DOUBLE,
+                TemporalPrecisionMode.ADAPTIVE_TIME_MICROSECONDS,
+                JdbcValueConverters.BigIntUnsignedMode.PRECISE,
                 BinaryHandlingMode.BYTES);
         tableSchemaBuilder = new TableSchemaBuilder(
                 converters,
@@ -2773,7 +2774,7 @@ public class MySqlAntlrDdlParserTest {
         Table tableDef = tables.forTable(new TableId(null, null, "datadef"));
         assertThat(tableDef.columnWithName("id").isOptional()).isEqualTo(false);
         assertThat(tableDef.columnWithName("id").hasDefaultValue()).isEqualTo(true);
-        assertThat(getColumnSchema(table, "id").defaultValue()).isEqualTo(0);
+        assertThat(getColumnSchema(tableDef, "id").defaultValue()).isEqualTo(0);
 
         ddl = "DROP TABLE IF EXISTS data; " +
                 "CREATE TABLE data(id INT DEFAULT 1, PRIMARY KEY (id))";
@@ -3114,11 +3115,7 @@ public class MySqlAntlrDdlParserTest {
             super(false,
                     includeViews,
                     includeComments,
-                    new MySqlValueConverters(
-                            JdbcValueConverters.DecimalMode.DOUBLE,
-                            TemporalPrecisionMode.ADAPTIVE_TIME_MICROSECONDS,
-                            JdbcValueConverters.BigIntUnsignedMode.PRECISE,
-                            BinaryHandlingMode.BYTES),
+                    converters,
                     tableFilter);
             this.ddlChanges = changesListener;
         }
