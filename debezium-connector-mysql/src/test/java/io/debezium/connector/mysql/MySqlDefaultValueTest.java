@@ -203,15 +203,15 @@ public class MySqlDefaultValueTest {
                 ");";
         parser.parse(sql, tables);
         Table table = tables.forTable(new TableId(null, null, "UNSIGNED_BIGINT_TABLE"));
-//        assertThat(getColumnSchema(table, "A").defaultValue()).isEqualTo(BigDecimal.ZERO);
-//        assertThat(getColumnSchema(table, "B").defaultValue()).isEqualTo(new BigDecimal(10));
-//        assertThat(table.columnWithName("C").isOptional()).isEqualTo(true);
-//        assertThat(table.columnWithName("C").hasDefaultValue()).isTrue();
-//        assertThat(table.columnWithName("D").isOptional()).isEqualTo(false);
-//        assertThat(table.columnWithName("D").hasDefaultValue()).isFalse();
-//        assertThat(table.columnWithName("E").isOptional()).isEqualTo(false);
-//        assertThat(getColumnSchema(table, "E").defaultValue()).isEqualTo(BigDecimal.ZERO);
-//        assertThat(getColumnSchema(table, "F").defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "A").defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "B").defaultValue()).isEqualTo(new BigDecimal(10));
+        assertThat(table.columnWithName("C").isOptional()).isEqualTo(true);
+        assertThat(table.columnWithName("C").hasDefaultValue()).isTrue();
+        assertThat(table.columnWithName("D").isOptional()).isEqualTo(false);
+        assertThat(table.columnWithName("D").hasDefaultValue()).isFalse();
+        assertThat(table.columnWithName("E").isOptional()).isEqualTo(false);
+        assertThat(getColumnSchema(table, "E").defaultValue()).isEqualTo(BigDecimal.ZERO);
+        assertThat(getColumnSchema(table, "F").defaultValue()).isEqualTo(BigDecimal.ZERO);
         assertThat(getColumnSchema(table, "G").defaultValue()).isEqualTo(new BigDecimal("18446744073709551615"));
     }
 
