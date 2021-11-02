@@ -21,9 +21,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+
 import io.debezium.annotation.Immutable;
 import io.debezium.relational.Column;
 import io.debezium.relational.DefaultValueConverter;
+import io.debezium.relational.ValueConverter;
 import io.debezium.util.Collect;
 
 /**
@@ -74,7 +79,24 @@ public class MySqlDefaultValueConverter implements DefaultValueConverter {
      */
     @Override
     public Optional<Object> parseDefaultValue(Column column, String defaultValueExpression) {
-        return Optional.ofNullable(convert(column, defaultValueExpression));
+        Object logicalDefaultValue = convert(column, defaultValueExpression);
+        if (logicalDefaultValue == null) {
+            return Optional.empty();
+        }
+
+        final SchemaBuilder schemaBuilder = converters.schemaBuilder(column);
+        if (schemaBuilder == null) {
+            return Optional.of(logicalDefaultValue);
+        }
+        final Schema schema = schemaBuilder.build();
+
+        // In order to get the valueConverter for this column, we have to create a field;
+        // The index value -1 in the field will never used when converting default value;
+        // So we can set any number here;
+        final Field field = new Field(column.name(), -1, schema);
+        final ValueConverter valueConverter = converters.converter(column, field);
+
+        return Optional.ofNullable(valueConverter.convert(logicalDefaultValue));
     }
 
     /**
