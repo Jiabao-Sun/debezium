@@ -7,6 +7,7 @@ package io.debezium.relational;
 
 import java.sql.Types;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -77,7 +78,8 @@ public class TableSchemaBuilder {
                               boolean sanitizeFieldNames, boolean multiPartitionMode) {
         this.schemaNameAdjuster = schemaNameAdjuster;
         this.valueConverterProvider = valueConverterProvider;
-        this.defaultValueConverter = defaultValueConverter;
+        this.defaultValueConverter = Optional.ofNullable(defaultValueConverter)
+                .orElse(DefaultValueConverter.passthrough());
         this.sourceInfoSchema = sourceInfoSchema;
         this.fieldNamer = FieldNameSelector.defaultSelector(sanitizeFieldNames);
         this.customConverterRegistry = customConverterRegistry;

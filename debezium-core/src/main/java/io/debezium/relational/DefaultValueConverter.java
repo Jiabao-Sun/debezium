@@ -27,4 +27,13 @@ public interface DefaultValueConverter {
      */
     Optional<Object> parseDefaultValue(Column column, String defaultValueExpression);
 
+    /**
+     * Obtain a DefaultValueConverter that passes through values.
+     *
+     * @return the pass-through DefaultValueConverter; never null
+     */
+    static DefaultValueConverter passthrough() {
+        return (column, defaultValueExpression) -> Optional.ofNullable(defaultValueExpression);
+    }
+
 }

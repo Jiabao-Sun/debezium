@@ -235,9 +235,11 @@ final class ColumnImpl implements Column, Comparable<Column> {
                 .optional(isOptional())
                 .autoIncremented(isAutoIncremented())
                 .generated(isGenerated())
-                .defaultValueExpression(defaultValueExpression().orElse(null))
                 .enumValues(enumValues)
                 .comment(comment);
+        if (hasDefaultValue()) {
+            editor.defaultValueExpression(defaultValueExpression().orElse(null));
+        }
         return editor;
     }
 }
