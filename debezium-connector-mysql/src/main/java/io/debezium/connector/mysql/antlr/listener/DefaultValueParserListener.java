@@ -73,8 +73,11 @@ public class DefaultValueParserListener extends MySqlParserBaseListener {
     }
 
     public void exitDefaultValue(boolean skipIfUnknownOptional) {
-        if (!converted && (optionalColumn.get() != null || !skipIfUnknownOptional)) {
-            columnEditor.optional(optionalColumn.get());
+        boolean isOptionalColumn = optionalColumn.get() != null;
+        if (!converted && (isOptionalColumn || !skipIfUnknownOptional)) {
+            if (isOptionalColumn) {
+                columnEditor.optional(optionalColumn.get().booleanValue());
+            }
             converted = true;
         }
     }
